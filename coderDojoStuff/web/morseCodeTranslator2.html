@@ -1,0 +1,173 @@
+<html>
+<head>
+<title></title>
+<script src="//cdn.jsdelivr.net/jquery/1.10.2/jquery-1.10.2.min.js"></script>
+
+</head>
+</html>
+<body>
+<p>
+<textarea placeholder="Type your message" id="msg" style="font:20px/1.25 normal freemono, courier, monospace;width:100%;height:7em;"></textarea>
+<br /><br />
+<button id="morseify">Translate!</button> &nbsp;  &nbsp; 
+<label for="aud">Play audio? &nbsp; </label> <input type="checkbox" id="aud" />
+</p>
+
+<script> // <!--
+var letters = {
+      'a': ".-"
+    , 'b': "-..."
+    , 'c': "-.-."
+    , 'd': "-.."
+    , 'e': "."
+    , 'f': "..-."
+    , 'g': "--."
+    , 'h': "...."
+    , 'i': ".."
+    , 'j': ".---"
+    , 'k': "-.-"
+    , 'l': ".-.."
+    , 'm': "--"
+    , 'n': "-."
+    , 'o': "---"
+    , 'p': ".--."
+    , 'q': "--.-"
+    , 'r': ".-."
+    , 's': "..."
+    , 't': "-"
+    , 'u': "..-"
+    , 'v': "...-"
+    , 'w': ".--"
+    , 'x': "-..-"
+    , 'y': "-.--"
+    , 'z': "--.."
+    , '1': ".----"
+    , '2': "..---"
+    , '3': "...--"
+    , '4': "....-"
+    , '5': "....."
+    , '6': "-...."
+    , '7': "--..."
+    , '8': "---.."
+    , '9': "----."
+    , '0': "-----"
+    , ' ': "_"
+    , '.': " "
+    , "\n" : "_"
+    , "\t" : "_"
+};
+
+// Acquired from http://stackoverflow.com/a/1159307
+// Just invert the hash. Lot uglier than haskell though.
+function array_flip( trans ) {
+    var key, tmp_ar = {};
+    for ( key in trans ) {
+        if ( trans.hasOwnProperty( key ) ) {
+            tmp_ar[trans[key]] = key;
+        }
+    }
+    return tmp_ar;
+}
+
+var unletters = array_flip(letters);
+
+// Do some morse stringifying/unstringifying
+function stringToMorse(msg) {
+   if(isMorse(msg.value)) { // got a morse string, have to go in reverse
+     msg.value = msg.value.split(' ').map(morseToChar).join('').replace(/[\s_]+/g,' ');
+   }
+   else { // non-morse strings are easy
+     msg.value = msg.value.toLowerCase().split('').map(charToMorse).join('');
+   }
+   return msg.value;
+}
+
+function charToMorse(c) {
+  s = letters[c];
+  if(!s) return '';
+  return s + ' ';
+}
+
+function morseToChar(c) {
+  return unletters[c];
+}
+
+function isMorse(s) {
+  return /^[\s\.\-_]*$/.test(s);
+}
+
+try {
+     var ctx = new(window.AudioContext || window.webkitAudioContext);
+}
+catch(e) {
+     $('#err').show();
+}
+
+var beep = (function () {
+     return function (duration, type, freq, finishedCallback) {
+        if(!ctx) return; 
+        duration = +duration;
+        type = (type % 5) || 0;
+        if (typeof finishedCallback != "function") {
+            finishedCallback = function () {};
+        }
+        var osc = ctx.createOscillator();
+        osc.type = type;
+        osc.frequency.value = freq;
+        osc.connect(ctx.destination);
+        osc.noteOn(0);
+        setTimeout(function () {
+            osc.noteOff(0);
+            finishedCallback();
+        }, duration);
+    };
+})();
+
+var dit       = function() {beep(100, 0, 600)}
+var dah       = function() {beep(300, 0, 600)}
+var space     = function() {beep(100, 0, 0)}
+var medSpace  = function() {beep(200, 0, 0)}
+var longSpace = function() {beep(500, 0, 0)}
+
+function doNote(n,delay) { 
+  return setTimeout(function(){n()},delay);
+}
+
+function morseStringToAudio(m) {
+  ms = m.split('');
+  timeSoFar = 0;
+  for(i=0;i<ms.length;i++) {
+    if(ms[i]=='_') {
+      timeSoFar += 500;
+      doNote(longSpace,timeSoFar);
+    }
+    else if(ms[i]==' ') {
+      timeSoFar += 200;
+      doNote(medSpace,timeSoFar);
+    }
+    else if(ms[i]=='.') {
+      timeSoFar += 100;
+      doNote(dit,timeSoFar); 
+      timeSoFar += 100;
+      doNote(space,timeSoFar);
+    }
+    else if(ms[i]=='-') {
+      timeSoFar += 300;
+      doNote(dah,timeSoFar); 
+      timeSoFar += 100;
+      doNote(space,timeSoFar);
+    }
+  }
+}
+
+document.getElementById("morseify").addEventListener("click", function () {
+    msg = stringToMorse(document.getElementById("msg"));
+    if(isMorse(msg) && document.getElementById("aud").checked) {
+      morseStringToAudio(msg);
+    }
+});
+  // -->
+</script>	
+
+</body>
+</html>
