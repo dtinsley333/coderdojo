@@ -1,0 +1,27 @@
+<html>
+  <head>
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <script>
+    google.load('visualization', '1', { 'packages': ['map'] });
+    google.setOnLoadCallback(drawMap);
+
+    function drawMap() {
+    var data = google.visualization.arrayToDataTable([
+    ['Lat', 'Long', 'Name'],
+    [36.1667, -86.7833, 'Nashville'],
+    [35.9292, -86.8575, 'Franklin']
+    
+  ]);
+
+    var options = { showTip: true };
+
+    var map = new google.visualization.Map(document.getElementById('chart_div'));
+
+    map.draw(data, options);
+  };
+  </script>
+  </head>
+  <body>
+    <div id="chart_div"></div>
+  </body>
+</html>

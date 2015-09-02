@@ -1,0 +1,1 @@
+have the kids replace the pics with pics of their choice.  Have them replace the lorem ipsum with their text..
